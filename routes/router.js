@@ -42,4 +42,12 @@ router.post("/users", async (req, res) => {
   })
 
 
+  //delete api 
+  router.delete("/user/:_id", async (req, res) => {
+    let deleteselecteduser = await User.deleteOne(req.params)
+    res.send(deleteselecteduser)
+  })
+  
+
+
 module.exports = router
