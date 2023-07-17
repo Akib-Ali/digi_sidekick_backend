@@ -6,7 +6,7 @@ const path = require('path')
 
 
 //post api 
-router.post("/post-newuser", async (req, res) => {
+router.post("/users", async (req, res) => {
     try {
       const { user_name, age,position, gender, location } = req.body;
       console.log(req.body)
@@ -30,7 +30,16 @@ router.post("/post-newuser", async (req, res) => {
     }
   
   })
-  
+
+  //get api
+  router.get("/users", async(req, res)=>{
+    let userlist = await User.find().sort({ createdAt: -1 })
+    if (userlist.length > 0) {
+        res.send(userlist)
+      } else {
+        res.send({ result: "No Result found" })
+      }
+  })
 
 
 module.exports = router
