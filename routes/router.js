@@ -48,27 +48,20 @@ router.delete("/user/:_id", async (req, res) => {
     res.send(deleteselecteduser)
 })
 
+//single user api
+
+
+router.get('/user/:_id', async (req, res) => {
+    let result = await User.findOne({ _id: req.params._id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record found" });
+    }
+  });
+
 //update api 
 
-// router.post("user/:_id", async (req, res) => {
-//     try {
-//         const { user_name, age, position, gender, location } = req.body;
-//         console.log(req.body)
-//         const updatedUser = {
-//             user_name,
-//             age,
-//             position,
-//             gender,
-//             location,
-//             createdAt: Date.now()
-//           };
-//         let result = await User.findByIdAndUpdate(req.params._id, updatedUser, { new: true });
-//         res.send(result);
-
-//     } catch (error) {
-//         console.log(error)
-
-//     }
 router.put("/user/:_id", async (req, res) => {
     try {
       const { user_name, age, position, gender, location } = req.body;
@@ -86,12 +79,7 @@ router.put("/user/:_id", async (req, res) => {
     } catch (error) {
       console.log(error);
     }
-  
-
-
-
-
-})
+  })
 
 
 module.exports = router
