@@ -1,8 +1,14 @@
 const express = require('express');
 const router = new express.Router();
 const conn = require('../db/conn');
-const User = require('../db/user')
+const User = require('../db/user');
+const Patient =  require("../db/clinic_patient");
+const Doctor = require("../db/clinic_admin");
 const path = require('path')
+const Jwt = require("jsonwebtoken")
+const jwtKey = "dela-axionic";
+const bcrypt = require("bcrypt")
+
 
 
 //post api 
@@ -81,5 +87,93 @@ router.put("/user/:_id", async (req, res) => {
     }
   })
 
+
+
+  //clinics 
+
+
+  //post api 
+router.post("/add-patient", async (req, res) => {
+  try {
+      const {first_name, middle_name,last_name, mobile_no, whatsapp_no, clinic_name} = req.body;
+      console.log(req.body)
+
+      const newPatient = new Patient({
+          first_name,
+          middle_name,
+          last_name,
+          whatsapp_no,
+          mobile_no,
+          clinic_name,
+          createdAt: Date.now()
+
+      })
+
+      let result = await newPatient.save();
+      res.send(result)
+
+  } catch (error) {
+      console.log(error)
+
+  }
+
+})
+
+//get api
+router.get("/patient-list", async (req, res) => {
+  let patientlist = await Patient.find().sort({ createdAt: -1 })
+  if (patientlist.length > 0) {
+      res.send(patientlist)
+  } else {
+      res.send({ result: "No Result found" })
+  }
+})
+
+
+
+//jwt
+
+
+
+
+router.post("/register-doctor", async (req, res) => {
+  const { name, email, password } = req.body;
+  const hashPassword = await bcrypt.hash(password, 10)
+  const user = new Doctor({
+    name,
+    email,
+    password: hashPassword,
+    createdAt: Date.now()
+  })
+  let result = await user.save()
+  result = result.toObject()
+  delete result.password
+  res.send(result)
+
+})
+
+
+
+router.post("/login", async (req, res) => {
+  if (req.body.email && req.body.password) {
+    let user = await Doctor.findOne({ email: req.body.email });
+    if (user) {
+      const matchPassword = await bcrypt.compare(req.body.password, user.password);
+      if (matchPassword) {
+        Jwt.sign({ user }, jwtKey, { expiresIn: "2h" }, (err, token) => {
+          if (err) {
+            res.send({ result: "something went wrong please try again later" });
+          } else {
+            res.send({ user, auth: token });
+          }
+        });
+      } else {
+        res.send({ result: "Incorrect password" });
+      }
+    } else {
+      res.send({ result: "No User found" });
+    }
+  }
+});
 
 module.exports = router
